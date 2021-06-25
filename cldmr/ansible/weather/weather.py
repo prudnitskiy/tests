@@ -11,15 +11,14 @@ from prometheus_client import Gauge, start_http_server
 
 def handleWeather(apikey):
     current_temperature = False
-    url = ("https://api.openweathermap.org/data/2.5/onecall?"
+    url = ("https://api.openweathermap.org/data/2.5/weather?"
     "lat={lat}&lon={lon}&"
-    "exclude=minutely,hourly,daily,alerts&"
     "units=metric&appid={apikey}").format(lat=59.26,
                                           lon=24.45,
                                           apikey=apikey)
     r = requests.get(url)
     if r.status_code == 200:
-        current_temperature = r.json()['current']['temp']
+        current_temperature = r.json()['main']['temp']
         g.set(current_temperature)
     else:
         logging.warning("Can't handle a request, responce code is {0}".format(r.status_code))
