@@ -66,17 +66,17 @@
           - "/etc/prometheus:/opt/bitnami/prometheus/conf:ro"
           - "/var/lib/prometheus:/opt/bitnami/prometheus/data:rw"
 
-    - name: install grafana
-      docker_container:
-        name: grafana
-        image: "grafana/grafana:8.0.3"
-        ports:
-          - "0.0.0.0:80:3000/tcp"
-        networks:
-          - name: promnet
-        env:
-          GF_SECURITY_ADMIN_USER: "admin"
-          GF_SECURITY_ADMIN_PASSWORD: "{{ gfpass|mandatory }}"
+    # - name: install grafana
+    #   docker_container:
+    #     name: grafana
+    #     image: "grafana/grafana:8.0.3"
+    #     ports:
+    #       - "0.0.0.0:80:3000/tcp"
+    #     networks:
+    #       - name: promnet
+    #     env:
+    #       GF_SECURITY_ADMIN_USER: "admin"
+    #       GF_SECURITY_ADMIN_PASSWORD: "{{ gfpass|mandatory }}"
 
     - name: copy weatherExporter to target
       copy:
@@ -88,13 +88,13 @@
         build:
           path: /var/tmp/weather
         name: asn-weather
-        tag: "0.0.1"
+        tag: "0.0.2"
         source: build
     
     - name: install weather
       docker_container:
         name: weatherexporter
-        image: "asn-weather:0.0.1"
+        image: "asn-weather:0.0.2"
         networks:
           - name: promnet
         env:
