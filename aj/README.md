@@ -20,4 +20,4 @@ This program is shared under LGPLv2
 
 ## TLS balancer metrics
 
-Please look to the (TLS_METRICS)[https://github.com/prudnitskiy/tests/blob/master/aj/TLS_METRICS.md] file.
+Please look to the [TLS_METRICS](TLS_METRICS.md) file.
