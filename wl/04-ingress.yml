@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: registry-basic-auth
+  labels:
+    app: registry
+    part-of: registry
+    env: tests
+data:
+  auth: cmVnaXN0cnk6JGFwcjEkR05GcVFJdmgkZm11c1pqQnl1ZWxhbUhzSERGaWNHLgo=
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: docker-registry
+  labels:
+    app: registry
+    part-of: registry
+    env: tests
+  annotations:
+    nginx.ingress.kubernetes.io/auth-type: basic
+    nginx.ingress.kubernetes.io/auth-secret: registry-basic-auth
+    nginx.ingress.kubernetes.io/auth-realm: 'registry auth'
+    nginx.ingress.kubernetes.io/backend-protocol: 'HTTPS'
+spec:
+  tls:
+  - hosts:
+    - registry.fake.dom
+    secretName: registry-tls-external
+  rules:
+  - host: registry.fake.dom
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: registry
+          servicePort: 443

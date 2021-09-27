@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Secret
 type: kubernetes.io/tls
 metadata:
-  name: registry-tls
+  name: registry-tls-internal
   labels:
     app: registry
     part-of: registry
@@ -77,7 +77,7 @@ spec:
       volumes:
       - name: registry-tls
         secret: 
-          secretName: registry-tls 
+          secretName: registry-tls-internal
           optional: false
       - name: registry-fs
         persistentVolumeClaim:
