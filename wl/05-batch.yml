@@ -46,12 +46,12 @@ spec:
               - garbage-collect
               - /conf/config.yml
             resources:
-              cpu:
-                requests: "0.25"
-                limits: "0.25"
-              memory:
-                requests: 512Mi
-                limits: 512Mi
+              requests:
+                cpu: 250m
+                memory: 512Mi
+              limits:
+                cpu: 250m
+                memory: 512Mi
             volumeMounts:
             - name: registry-gc-conf
               mountPath: "/conf"
@@ -65,4 +65,5 @@ spec:
             persistentVolumeClaim:
               claimName: registry-shared-pvc
           restartPolicy: OnFailure
+  concurrencyPolicy: Forbid
   schedule: 0 5 * * ?

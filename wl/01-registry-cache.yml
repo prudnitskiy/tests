@@ -6,6 +6,9 @@ data:
 kind: Secret
 metadata:
   name: registry-cache-password
+  labels:
+    part-of: registry
+    env: tests
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -33,19 +36,19 @@ spec:
       - image: bitnami/redis:6.0.15
         name: registry-cache
         env:
-          - name: REDIS_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: registry-cache-password
-                key: password
-                optional: false
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: registry-cache-password
+              key: password
+              optional: false
         resources:
-          cpu:
-            requests: "0.1"
-            limits: "0.25"
-          memory:
-            requests: 128Mi
-            limits: 256Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits: 
+            cpu: 250m
+            memory: 256Mi
 ---
 apiVersion: v1
 kind: Service
