@@ -3,7 +3,6 @@ kind: Secret
 metadata:
   name: registry-basic-auth
   labels:
-    app: registry
     part-of: registry
     env: tests
 data:
@@ -14,14 +13,13 @@ kind: Ingress
 metadata:
   name: docker-registry
   labels:
-    app: registry
     part-of: registry
     env: tests
   annotations:
     nginx.ingress.kubernetes.io/auth-type: basic
     nginx.ingress.kubernetes.io/auth-secret: registry-basic-auth
-    nginx.ingress.kubernetes.io/auth-realm: 'registry auth'
-    nginx.ingress.kubernetes.io/backend-protocol: 'HTTPS'
+    nginx.ingress.kubernetes.io/auth-realm: "registry auth"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
 spec:
   tls:
   - hosts:
