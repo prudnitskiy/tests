@@ -1,0 +1,68 @@
+# password in plaintext is insecure and set here as illustration ONLY
+---
+apiVersion: v1
+data:
+  password: QW9LZjVjNERTQ0luVlNEN2NNM2tkNjRB
+kind: Secret
+metadata:
+  name: registry-cache-password
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: registry-cache
+    part-of: registry
+    env: tests
+  name: registry-cache
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: registry-cache
+      part-of: registry
+      env: tests
+  template:
+    metadata:
+      labels:
+        app: registry-cache
+        part-of: registry
+        env: tests
+    spec:
+      containers:
+      - image: bitnami/redis:6.0.15
+        name: registry-cache
+        env:
+          - name: REDIS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: registry-cache-password
+                key: password
+                optional: false
+        resources:
+          cpu:
+            requests: "0.1"
+            limits: "0.25"
+          memory:
+            requests: 128Mi
+            limits: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: registry-cache
+    part-of: registry
+    env: tests
+  name: registry-cache
+spec:
+  ports:
+  - name: redis
+    port: 6379
+    protocol: TCP
+    targetPort: 6379
+  selector:
+    app: registry-cache
+    part-of: registry
+    env: tests
+  type: ClusterIP
