@@ -13,7 +13,7 @@ spec:
     storage: 10Gi
   accessModes:
     - ReadWriteMany
-  NFS:
+  nfs:
     server: nfs-server.local
     path: "/export/tests/registry"
 ---
@@ -27,9 +27,10 @@ metadata:
     env: tests
 spec:
   selector:
-    type: nfs
-    part-of: registry
-    env: tests
+    matchLabels:
+      type: nfs
+      part-of: registry
+      env: tests
   storageClassName: manual
   accessModes:
     - ReadWriteMany

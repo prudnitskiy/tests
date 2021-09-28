@@ -9,8 +9,8 @@ metadata:
     env: tests
     usage: internal
 data:
-  tls.crt: [...]
-  tls.key: [...]
+  tls.crt: AAAAAAAA
+  tls.key: XXXXXXXX
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -56,7 +56,7 @@ spec:
           value: "/tls/key.pem"
         - name: HTTP_DEBUG_ADDR
           value: "127.0.0.1:5001"
-        livnessProbe:
+        livenessProbe:
           httpGet:
             host: "127.0.0.1"
             port: 5001
