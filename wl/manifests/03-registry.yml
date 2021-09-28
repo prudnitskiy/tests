@@ -51,14 +51,13 @@ spec:
         - name: HTTP_ADDR
           value: "0.0.0.0:443"
         - name: HTTP_TLS_CERTIFICATE
-          value: "/tls/cert.pem"
+          value: "/tls/tls.crt"
         - name: HTTP_TLS_KEY
-          value: "/tls/key.pem"
+          value: "/tls/tls.key"
         - name: HTTP_DEBUG_ADDR
-          value: "127.0.0.1:5001"
+          value: "0.0.0.0:5001"
         livenessProbe:
           httpGet:
-            host: "127.0.0.1"
             port: 5001
             scheme: HTTP
             path: "/debug"
