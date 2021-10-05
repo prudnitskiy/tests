@@ -55,9 +55,9 @@ def deleteTag(repo, tag):
     manifest = r['config']['digest']
     log.debug("{0}/{1}: digest: {2}".format(repo, tag, manifest))
     url = "{registry_url}/v2/{repo}/manifests/{manifest}".format(registry_url = registry_url,
-                                                             repo = repo,
-                                                             manifest = manifest,
-                                                             )
+                                                                 repo = repo,
+                                                                 manifest = manifest,
+                                                                 )
     r = requests.delete(url, headers=headers, auth=auth)
     if r.status_code == 200:
         log.info("[deleteTag] {0}:{1} deleted".format(repo, tag))
