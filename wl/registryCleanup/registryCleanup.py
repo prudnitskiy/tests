@@ -15,8 +15,8 @@ auth_user = os.environ.get("REGISTRY_AUTH_USER", None)
 auth_pass = os.environ.get("REGISTRY_AUTH_PASS", None)
 
 retentions = {
-    'app/calculator': 5,
-    'alpine' : 5
+    'app/calculator': 10,
+    'app/jmeter' : 5
 }
 
 headers = {"accept": "application/vnd.docker.distribution.manifest.v2+json"}
