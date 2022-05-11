@@ -30,9 +30,13 @@ def monkeyLoop(clargs):
 def findPods(kclient, namespace, annotation=False):
     pods = []
     fselector = "metadata.namespace={0},status.phase=Running".format(namespace)
-    ret = kclient.list_pod_for_all_namespaces(watch=False, field_selector=fselector)
     if annotation:
         logging.debug("annotation:{0}".format(annotation))
+    try:
+        ret = kclient.list_pod_for_all_namespaces(watch=False, field_selector=fselector)
+    except ApiException as e:
+        logging.info("pod list failed: {0}".format(str(e)))
+        return False
     for i in ret.items:
         if annotation and i.metadata.annotations:
             if annotation in i.metadata.annotations:
@@ -53,9 +57,14 @@ def deletePod(kclient, pod, dryRun=False):
     if dryRun:
         logging.info("dry run set, no changes")
     else:
-        kclient.delete_namespaced_pod(name=pod.metadata.name, namespace=pod.metadata.namespace)
+        try:
+            kclient.delete_namespaced_pod(name=pod.metadata.name, namespace=pod.metadata.namespace)
+        except ApiException as e:
+            logging.info("pod delete failed: {0}".format(str(e)))
+            return False
         logging.info("{0}/{1} deleted".format(pod.metadata.namespace, pod.metadata.name))
         prom_killed.labels(pod.metadata.labels).inc()
+        return True
 
 
 if __name__ == '__main__':
