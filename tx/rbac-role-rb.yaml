@@ -8,7 +8,7 @@ metadata:
     tier: test-assignment
     part-of: cmonkey
 rules:
-  - apiGroups: v1
+  - apiGroups: ['v1']
     resources: ['pods']
     verbs: ['list', 'get', 'delete']
 ---
