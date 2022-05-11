@@ -52,6 +52,7 @@ def deletePod(kclient, pod, dryRun=False):
         logging.debug("dry run set, no changes")
     else:
         kclient.delete_namespaced_pod(name=pod.metadata.name, namespace=pod.metadata.namespace)
+        logging.info("{0}/{1} deleted".format(pod.metadata.namespace, pod.metadata.name))
 
 
 if __name__ == '__main__':
