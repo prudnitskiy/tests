@@ -4,6 +4,7 @@ import argparse
 import random
 import time
 from kubernetes import client, config
+from prometheus_client import start_http_server, Counter
 
 
 def monkeyLoop(clargs):
@@ -21,6 +22,7 @@ def monkeyLoop(clargs):
             deletePod(kclient=v1, pod=pods[randomSelectedPod], dryRun=clargs.dry_run)
         took = time.monotonic() - start
         left = clargs.timer - took
+        prom_epoch.inc()
         if left > 0:
             time.sleep(left)
 
@@ -40,7 +42,7 @@ def findPods(kclient, namespace, annotation=False):
             pods.append(i)
             logging.debug(i.metadata.name)
     if len(pods) > 0:
-        logging.info("{0} candidates filtered to deleteion".format(len(pods)))
+        logging.info("{0} candidates filtered to deletion".format(len(pods)))
         return pods
     else:
         return False
@@ -49,10 +51,11 @@ def findPods(kclient, namespace, annotation=False):
 def deletePod(kclient, pod, dryRun=False):
     logging.debug("deleting pod {0}".format(pod.metadata.name))
     if dryRun:
-        logging.debug("dry run set, no changes")
+        logging.info("dry run set, no changes")
     else:
         kclient.delete_namespaced_pod(name=pod.metadata.name, namespace=pod.metadata.namespace)
         logging.info("{0}/{1} deleted".format(pod.metadata.namespace, pod.metadata.name))
+        prom_killed.labels(pod.metadata.labels).inc()
 
 
 if __name__ == '__main__':
@@ -89,7 +92,12 @@ if __name__ == '__main__':
                         level=clargs.verbose.upper())
 
     # Init
-    logging.info("Starting up. Namespace: {0}, wakeup every {1}".format(clargs.namespace, clargs.timer))
+    logging.info("Starting up. Namespace: {0}, wakeup every {1} seconds".format(clargs.namespace, clargs.timer))
     if clargs.filter:
         logging.info("annotation filter: {0}".format(clargs.filter))
+
+    start_http_server(8000)
+
+    prom_epoch = Counter('epoch', 'epochs passed since first run')
+    prom_killed = Counter('killed', 'pods killed since start', ['labels'])
     monkeyLoop(clargs)
