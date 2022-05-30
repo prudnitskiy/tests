@@ -1,0 +1,46 @@
+---
+- name: configure server
+  hosts:
+    - testserver.aa
+  vars:
+    loghost: XXX.log.example.com
+  tasks:
+    - name: install webserver
+      apt:
+        name: nginx-core
+    - name: enable and start webserver
+      service:
+        name: nginx
+        enabled: yes
+        state: started
+    - name: copy html file
+      template:
+        src: "{{ inventory_dir }}/templates/web.html.j2"
+        dest: /var/www/html/web.html
+    - name: configure firewall
+      template:
+        src: "{{ inventory_dir }}/templates/firewall.conf.j2"
+        dest: "/etc/iptables.conf"
+        owner: root
+        mode: 0640
+      notify: reload firewall
+    - name: enable firewall autostart
+      template:
+        src: "{{ inventory_dir }}/templates/firewall.sh.j2"
+        dest: "/etc/network/if-up.d/iptables"
+        mode: 0755
+        owner: "root"
+      notify: reload firewall
+    - name: configure logserver
+      template:
+        src: "{{ inventory_dir }}/templates/rsyslog-remote.conf.j2"
+        dest: "/etc/rsyslog.d/99-remote.conf"
+      notify: reload syslog
+  handlers:
+    - name: reload firewall
+      command: /etc/network/if-up.d/iptables
+    - name: reload syslog
+      service:
+        name: rsyslog
+        enabled: yes
+        state: restarted

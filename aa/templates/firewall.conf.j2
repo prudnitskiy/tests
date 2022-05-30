@@ -1,0 +1,20 @@
+# iptables rules. Do not change it manually, it will be overwritten on update
+# {{ ansible_managed }}
+*filter
+:INPUT ACCEPT [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+:FIREWALL - [0:0]
+-A INPUT -j FIREWALL
+#ATStart
+-A FIREWALL -i lo -j ACCEPT
+-N BLACKLIST
+-A FIREWALL -j BLACKLIST
+-A FIREWALL -p tcp -m tcp --dport 22 --tcp-flags FIN,SYN,RST,ACK SYN -j ACCEPT
+-A FIREWALL -p tcp -m tcp --dport 80 --tcp-flags FIN,SYN,RST,ACK SYN -j ACCEPT
+-A FIREWALL -p tcp -m tcp --dport 443 --tcp-flags FIN,SYN,RST,ACK SYN -j ACCEPT
+-A FIREWALL -p udp -m udp --sport 53 -j ACCEPT
+-A FIREWALL -p udp -m udp --sport 123 -j ACCEPT
+-A FIREWALL -p tcp -m tcp --tcp-flags FIN,SYN,RST,ACK SYN -j REJECT --reject-with icmp-port-unreachable
+-A FIREWALL -p udp -m udp -j REJECT --reject-with icmp-port-unreachable
+COMMIT

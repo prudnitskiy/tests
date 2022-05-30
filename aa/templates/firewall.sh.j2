@@ -1,0 +1,4 @@
+#!/bin/sh
+# configures IPTABLES on start
+# {{ ansible_managed }}
+/sbin/iptables-restore < /etc/iptables.conf
