@@ -3,11 +3,12 @@ provider "kubernetes" {
   cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
 
   exec {
-    api_version = "client.authentication.k8s.io/v1alpha1"
+    api_version = "client.authentication.k8s.io/v1beta1"
     command     = "aws"
     args = ["eks", "get-token", "--cluster-name", module.eks.cluster_id]
   }
 }
+
 
 provider "helm" {
   kubernetes {
@@ -22,11 +23,13 @@ provider "helm" {
   }
 }
 
+
 resource "helm_release" "ingress-nginx" {
   name       = "ingress-nginx"
   chart      = "ingress-nginx"
   repository = "https://kubernetes.github.io/ingress-nginx"
 }
+
 
 resource "kubernetes_secret" "docker" {
   metadata {
@@ -94,7 +97,7 @@ resource "kubernetes_deployment" "simplews" {
           }
         }
         image_pull_secrets {
-          name = kubernetes_secret.docker.metadata.name
+          name = kubernetes_secret.docker.metadata[0].name
         }
       }
     }
@@ -108,7 +111,7 @@ resource "kubernetes_service" "simplews" {
   }
   spec {
     selector = {
-      app = kubernetes_deployment.simplews.metadata.0.labels.app
+      app = kubernetes_deployment.simplews.metadata[0].labels.app
     }
     port {
       port        = 8081
