@@ -28,6 +28,10 @@ resource "helm_release" "ingress-nginx" {
   name       = "ingress-nginx"
   chart      = "ingress-nginx"
   repository = "https://kubernetes.github.io/ingress-nginx"
+  set {
+    name  = "controller.admissionWebhooks.enabled"
+    value = "false"
+  }
 }
 
 
@@ -55,7 +59,7 @@ resource "kubernetes_secret" "docker" {
 
 resource "kubernetes_deployment" "simplews" {
   metadata {
-    name = "simplews"
+    name   = "simplews"
     labels = {
       app = "simplews"
     }
@@ -118,4 +122,40 @@ resource "kubernetes_service" "simplews" {
       target_port = 8081
     }
   }
+}
+
+
+resource "kubernetes_ingress_v1" "simplews" {
+  wait_for_load_balancer = true
+  metadata {
+    name = "simplews"
+  }
+  spec {
+    ingress_class_name = "nginx"
+    rule {
+      http {
+        path {
+          path = "/"
+          path_type = "Prefix"
+          backend {
+            service {
+              name = kubernetes_service.simplews.metadata.0.name
+              port {
+                number = 8081
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+
+output "load_balancer_hostname" {
+  value = kubernetes_ingress_v1.simplews.status.0.load_balancer.0.ingress.0.hostname
+}
+
+output "load_balancer_ip" {
+  value = kubernetes_ingress_v1.simplews.status.0.load_balancer.0.ingress.0.ip
 }
