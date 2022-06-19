@@ -48,3 +48,71 @@ resource "kubernetes_secret" "docker" {
     })
   }
 }
+
+
+resource "kubernetes_deployment" "simplews" {
+  metadata {
+    name = "simplews"
+    labels = {
+      app = "simplews"
+    }
+  }
+  spec {
+    replicas = 1
+    selector {
+      match_labels = {
+        app = "simplews"
+      }
+    }
+    template {
+      metadata {
+        labels = {
+          app = "simplews"
+        }
+      }
+      spec {
+        container {
+          image = "${var.deploy_image}:${var.deploy_version}"
+          name  = "simplews"
+          resources {
+            limits = {
+              cpu    = "0.5"
+              memory = "256Mi"
+            }
+            requests = {
+              cpu    = "250m"
+              memory = "50Mi"
+            }
+          }
+          liveness_probe {
+            http_get {
+              path = "/health"
+              port = 8081
+            }
+            initial_delay_seconds = 3
+            period_seconds        = 3
+          }
+        }
+        image_pull_secrets {
+          name = kubernetes_secret.docker.metadata.name
+        }
+      }
+    }
+  }
+}
+
+
+resource "kubernetes_service" "simplews" {
+  metadata {
+    name = "simplews"
+  }
+  spec {
+    selector = {
+      app = kubernetes_deployment.simplews.metadata.0.labels.app
+    }
+    port {
+      port        = 8081
+      target_port = 8081
+    }
+  }
+}
