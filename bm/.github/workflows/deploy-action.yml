@@ -1,0 +1,44 @@
+name: GitHub Actions Demo
+on:
+  push:
+    tags: ['*']
+jobs:
+  BuildAndPublish:
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: eu-west-1
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Log in to Docker Hub
+        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Setting version
+        run: echo "BRANCH=${GITHUB_REF##*/}" >> $GITHUB_ENV
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: ${{ github.workspace }}/simplews
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/pprivate:${{ env.BRANCH }}
+          build-args: |
+            VERSION=${{ env.BRANCH }}
+      - name: Terraform init
+        shell: bash
+        working-directory: ${{ github.workspace }}/terraform
+        run: |
+          terraform init
+      - name: Terraform apply
+        shell: bash
+        working-directory: ${{ github.workspace }}/terraform
+        run: |
+          terraform apply \
+            -var=registry_username=${{ secrets.DOCKER_USERNAME }} \
+            -var=registry_password=${{ secrets.DOCKER_PASSWORD }} \
+            -var=registry_email=${{ secrets.DOCKER_EMAIL }} \
+            -var=deploy_version="${{ env.BRANCH }}" \
+            -auto-approve
